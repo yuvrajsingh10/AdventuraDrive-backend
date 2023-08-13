@@ -56,49 +56,118 @@ const registerUser = async (req, res) => {
   }
 };
 
-const logoutUser=async(req,res)=>{
-  const cookie = req.cookies
-  if(!cookie.refreshToken) throw new Error('This is no refresh Token Attached');
-  const refreshToken=cookie.refreshToken;
-  const user = await User.findOne({refreshToken});
-  if(!user) {
-    res.clearCookie('refreshToken',{
-      httpOnly:true,
-      secure:true,
-    })
-    return res.sendStatus(204);
-  }
-  await User.findOneAndUpdate(refreshToken,{
-    refreshToken:"",
-  },{new:true});
-  res.clearCookie('refreshToken',{
-    httpOnly:true,
-    secure:true
-  })
-  res.sendStatus(204) //forbidden
-}
 
+// logout-User
+const logoutUser = async (req, res) => {
+  const cookie = req.cookies;
+  if (!cookie.refreshToken)
+    throw new Error("This is no refresh Token Attached");
+  const refreshToken = cookie.refreshToken;
+  const user = await User.findOne({ refreshToken });
+  if (!user) {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+    });
+    return res.sendStatus(204); // Forbidden
+  }
+  await User.findOneAndUpdate(
+    refreshToken,
+    {
+      refreshToken: "",
+    },
+    { new: true }
+  );
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+  });
+  res.sendStatus(204); //Forbidden
+};
+
+// create booking 
 const createBooking = async (req, res) => {
   try {
     //jobs@mtechhzilla.com
     const { _id } = req.user;
-    const { vehicleType,pickUpLocation,dropLocation,pickUpTime,returnTime,pickUpDate,returnDate,} = req.body;
-    validateMongoId(_id);  
+    const {
+      vehicleType,
+      pickUpLocation,
+      dropLocation,
+      pickUpTime,
+      returnTime,
+      pickUpDate,
+      returnDate,
+    } = req.body;
+    validateMongoId(_id);
     const user = await User.findOne(_id);
 
     const bookings = await Bookings.create({
-      vehicleType,pickUpLocation,
-      dropLocation,pickUpTime,
-      returnTime,pickUpDate,
-      returnDate,bookedBy:user?._id,
+      vehicleType,
+      pickUpLocation,
+      dropLocation,
+      pickUpTime,
+      returnTime,
+      pickUpDate,
+      returnDate,
+      bookedBy: user?._id,
     });
     res.json({
       msg: "Car Booked succesfully",
-      booking:bookings
+      booking: bookings,
     });
   } catch (error) {
     throw new Error(error);
   }
 };
 
-module.exports = { loginUser, registerUser, createBooking ,logoutUser };
+const getAllUser = async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (error) {
+    throw new Error("Somethig went wrong in fetching user Details");
+  }
+};
+
+const getUser = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    validateMongoId(_id);
+    const user = await User.findById({ _id });
+    res.json(user);
+  } catch (error) {
+    throw new Error("Somethig went wrong Please try again later ");
+  }
+};
+
+const deleteUser = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    validateMongoId(_id);
+    const user = await findByIdAndDelete({ _id });
+    res.json(user);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const updateUser = (req, res) => {
+  const _id = req.params;
+  try {
+    validateMongoId(_id);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+module.exports = {
+  loginUser,
+  registerUser,
+  createBooking,
+  logoutUser,
+  getAllUser,
+  getUser,
+  deleteUser,
+  updateUser,
+};
