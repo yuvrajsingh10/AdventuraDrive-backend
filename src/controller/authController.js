@@ -3,7 +3,7 @@ const generateRefreshToken = require("../config/refreshToken");
 const generateToken = require("../config/jwtToken");
 const User = require("../db/models/userModel");
 const Bookings = require("../db/models/bookingModel");
-const validateMongoId = require("../utils/validateMongoId");
+const validateMongoId = require("../utils/validateMongoDbId");
 
 // login User Controller
 const loginUser = async (req, res) => {
