@@ -8,16 +8,26 @@ const {
   getUser,
   deleteUser,
   updateUser,
+  getAllUsers,
+  getBookings,
+  forgetPassword,
+  resetPassword
 } = require("../controller/authController");
-const { authMiddleware } = require("../middlewares/authMiddleware");
+const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 
 router.post("/login",loginUser);
 router.post("/register", registerUser);
 router.post("/booking",authMiddleware,createBooking);
+router.post('/forget-password',forgetPassword);
+
 router.put('/logout',authMiddleware,logoutUser);
 router.put('/update-user/:id',authMiddleware,updateUser)
-router.get('/get-user/:id',authMiddleware,isAdmin,getUser);
+router.put('/reset-password/:token',resetPassword)
+
 router.get('/get-users',authMiddleware,isAdmin,getAllUsers);
+router.get("/get-bookings", authMiddleware, getBookings);
+router.get('/get-user/:id',authMiddleware,isAdmin,getUser);
+
 router.delete('/delete-user/:id',authMiddleware,deleteUser);
 
 module.exports = router;

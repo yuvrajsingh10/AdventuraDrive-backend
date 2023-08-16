@@ -4,15 +4,12 @@ const User = require("../db/models/userModel");
 
 const authMiddleware = async (req, res, next) => {
   let token;
-  console.log(req.headers)
   if (req.headers?.authorization?.startsWith("Bearer")) {
-    token = req.headers.authorization.split(' ')[1];
-    console.log('this is the token here    :   ',token)
+    token = req.headers.authorization.split(" ")[1];
     try {
       if (token) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        console.log("sfsdfsdfsd  :   ", decoded.id.id);
-        const user = await User.findById({_id:decoded.id.id});
+        const user = await User.findById({ _id: decoded.id.id });
         req.user = user;
         next();
       }
@@ -24,5 +21,18 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
+const isAdmin = async (req, res, next) => {
+  const { email } = req.user;
+  try {
+    const adminUser = await User.findOne({ email });
+    if (adminUser.role !== "Admin") throw new Error("You are not an admin");
+    else {
+      next();
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 
-module.exports ={authMiddleware}
+
+module.exports = { authMiddleware, isAdmin };

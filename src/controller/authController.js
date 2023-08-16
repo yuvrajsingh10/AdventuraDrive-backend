@@ -3,7 +3,9 @@ const generateRefreshToken = require("../config/refreshToken");
 const generateToken = require("../config/jwtToken");
 const User = require("../db/models/userModel");
 const Bookings = require("../db/models/bookingModel");
-const validateMongoId = require("../utils/validateMongoDbId");
+const validateMongoDbId = require("../utils/validateMongoDbId");
+const { sendMail } = require("./emailController");
+const crypto = require("crypto");
 
 // login User Controller
 const loginUser = async (req, res) => {
@@ -56,7 +58,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-
 // logout-User
 const logoutUser = async (req, res) => {
   const cookie = req.cookies;
@@ -85,7 +86,7 @@ const logoutUser = async (req, res) => {
   res.sendStatus(204); //Forbidden
 };
 
-// create booking 
+// create booking
 const createBooking = async (req, res) => {
   try {
     //jobs@mtechhzilla.com
@@ -99,7 +100,7 @@ const createBooking = async (req, res) => {
       pickUpDate,
       returnDate,
     } = req.body;
-    validateMongoId(_id);
+    validateMongoDbId(_id);
     const user = await User.findOne(_id);
 
     const bookings = await Bookings.create({
@@ -121,7 +122,7 @@ const createBooking = async (req, res) => {
   }
 };
 
-const getAllUser = async (req, res) => {
+const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({});
     res.json(users);
@@ -133,7 +134,7 @@ const getAllUser = async (req, res) => {
 const getUser = async (req, res) => {
   const _id = req.params.id;
   try {
-    validateMongoId(_id);
+    validateMongoDbId(_id);
     const user = await User.findById({ _id });
     res.json(user);
   } catch (error) {
@@ -144,8 +145,9 @@ const getUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   const _id = req.params.id;
   try {
-    validateMongoId(_id);
-    const user = await findByIdAndDelete({ _id });
+    validateMongoDbId(_id);
+    const user = await User.findByIdAndDelete({ _id });
+    const bookings = await Bookings.deleteMany({ bookedBy: _id });
     res.json(user);
   } catch (error) {
     throw new Error(error);
@@ -155,7 +157,70 @@ const deleteUser = async (req, res) => {
 const updateUser = (req, res) => {
   const _id = req.params;
   try {
-    validateMongoId(_id);
+    validateMongoDbId(_id);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const getBookings = async (req, res) => {
+  const { _id } = req.user;
+  try {
+    validateMongoDbId(_id);
+    const userBookings = await Bookings.find({ bookedBy: _id });
+    res.json(userBookings);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const forgetPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) throw new Error("Email is not regesited ! please regester ");
+    // console.log(user)
+    const token = await user.createPasswordResetToken();
+    await user.save();
+    // const text = "Hey please follow this link to reset password .";
+    const resetUrl = `Hey please follow this link to reset password .
+    This link is valid for  10 min from now <br/> <a href="http//localhost:3000/api/user/reset-password/${token}">{Click here}</a>`;
+    // console.log(email,user.email)
+    const data = {
+      email: user.email,
+      name: user.name,
+      text: "Hey User",
+      subject: "Forget Password Link",
+      resetUrl: resetUrl,
+    };
+    sendMail(data);
+    res.json(token);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const { token } = req.params;
+    const passwordResetToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+    const user = await User.findOne({
+      passwordResetToken,
+      passwordResetTokenExpiry: { $gte: Date.now() },
+    });
+    if (!user)
+      throw new Error("Reset password link is Expire ! Please reset it again");
+    user.password = password;
+    user.passwordResetToken = "";
+    user.passwordResetTokenExpiry = "";
+    await user.save();
+    res.json({
+      msg:"Password Updated"
+    });
   } catch (error) {
     throw new Error(error);
   }
@@ -166,8 +231,11 @@ module.exports = {
   registerUser,
   createBooking,
   logoutUser,
-  getAllUser,
+  getAllUsers,
   getUser,
   deleteUser,
   updateUser,
+  getBookings,
+  forgetPassword,
+  resetPassword,
 };

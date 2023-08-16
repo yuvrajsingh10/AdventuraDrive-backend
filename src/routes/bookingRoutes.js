@@ -1,5 +1,9 @@
-const express = require('express')
+const express = require("express");
 const router = express.Router();
-const {auhtMiddlewares} =require('../middlewares/authMiddleware');
+const {getAllBookings} = require("../controller/BookingController");
+const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 
-router.get('/all-bookings',auhtMiddlewares,isAdmin)
+router.get("/all-bookings", authMiddleware, isAdmin, getAllBookings);
+
+
+module.exports = router;

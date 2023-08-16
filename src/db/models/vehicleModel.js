@@ -5,7 +5,7 @@ const vehicleSchama = mongoose.Schema({
         type:String,
         required:true,
     },
-    vehicleType:{
+    category:{
         type:String,
         required:true,
     },
@@ -19,8 +19,12 @@ const vehicleSchama = mongoose.Schema({
     },
     luggageCapacity:{
         type:Number
+    },
+    quantity:{
+        type:Number,
+        required:true,
     }
-},{timeStamps:true})
+},{timestamps:true})
 
 
 module.exports = mongoose.model("Vehicles",vehicleSchama);

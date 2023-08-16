@@ -5,14 +5,21 @@ dotenv.config();
 const initDbConnection = require("./db/init.js");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const authRoutes = require("./routes/authRoutes.js");
+const authRoutes = require("./routes/authRoutes");
+const bookingRoutes = require('./routes/bookingRoutes');
+const vehicleRoutes = require('./routes/vehicleRoutes');
 const port = process.env.PORT || 3000 ;
+const morgan = require('morgan')
 
+
+app.use(morgan('dev'))
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/user", authRoutes);
+app.use('/api/bookings',bookingRoutes)
+app.use('/api/vehicle',vehicleRoutes)
 
 initDbConnection()
   .then(() => {
