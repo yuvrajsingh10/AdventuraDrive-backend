@@ -4,8 +4,12 @@ const generateToken = require("../config/jwtToken");
 const User = require("../db/models/userModel");
 const Bookings = require("../db/models/bookingModel");
 const validateMongoDbId = require("../utils/validateMongoDbId");
+const Vehicle = require("../db/models/vehicleModel");
 const { sendMail } = require("./emailController");
 const crypto = require("crypto");
+const dayjs = require("dayjs");
+const isBetween = require('dayjs/plugin/isBetween')
+dayjs.extend(isBetween)
 
 // login User Controller
 const loginUser = async (req, res) => {
@@ -89,7 +93,7 @@ const logoutUser = async (req, res) => {
 // create booking
 const createBooking = async (req, res) => {
   try {
-    //jobs@mtechhzilla.com
+    const vehicleId = req.params.id;
     const { _id } = req.user;
     const {
       vehicleType,
@@ -97,9 +101,13 @@ const createBooking = async (req, res) => {
       dropLocation,
       pickUpTime,
       returnTime,
-      pickUpDate,
-      returnDate,
+      from,
+      to,
     } = req.body;
+    const bookingDate = {
+      from: dayjs().format(from + "T" + pickUpTime),
+      to: dayjs().format(to + "T" + returnTime),
+    };
     validateMongoDbId(_id);
     const user = await User.findOne(_id);
 
@@ -109,10 +117,19 @@ const createBooking = async (req, res) => {
       dropLocation,
       pickUpTime,
       returnTime,
-      pickUpDate,
-      returnDate,
+      bookingFrom: from + pickUpTime,
+      bookingTo: to + returnTime,
+      bookingTimeStamps: { $push: from, to },
+      bookingStatus: "processing",
       bookedBy: user?._id,
     });
+
+    const vehicle = await Vehicle.findById(vehicleId);
+    vehicle.bookingTimeStamps.push({
+      from: dayjs().format(bookingDate.from),
+      to: dayjs().format(bookingDate.to),
+    });    // refmvancouver
+    await vehicle.save();
     res.json({
       msg: "Car Booked succesfully",
       booking: bookings,
@@ -179,13 +196,13 @@ const forgetPassword = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) throw new Error("Email is not regesited ! please regester ");
-    // console.log(user)
+
     const token = await user.createPasswordResetToken();
     await user.save();
     // const text = "Hey please follow this link to reset password .";
     const resetUrl = `Hey please follow this link to reset password .
     This link is valid for  10 min from now <br/> <a href="http//localhost:3000/api/user/reset-password/${token}">{Click here}</a>`;
-    // console.log(email,user.email)
+
     const data = {
       email: user.email,
       name: user.name,
@@ -219,7 +236,7 @@ const resetPassword = async (req, res) => {
     user.passwordResetTokenExpiry = "";
     await user.save();
     res.json({
-      msg:"Password Updated"
+      msg: "Password Updated",
     });
   } catch (error) {
     throw new Error(error);

@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+const bookingTimeStams = mongoose.Schema({});
+
 const bookingSchema = mongoose.Schema(
   {
     vehicleType: {
@@ -14,12 +16,16 @@ const bookingSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    pickUpDate: {
-      type: Date,
+    // pickUpDate: {
+    //   type: Date,
+    //   required: true,
+    // },
+    bookingFrom: {
+      type: String,
       required: true,
     },
-    returnDate: {
-      type: Date,
+    bookingTo: {
+      type: String,
       required: true,
     },
     pickUpTime: {
@@ -29,6 +35,9 @@ const bookingSchema = mongoose.Schema(
     returnTime: {
       type: String,
       required: true,
+    },
+    bookingStatus: {
+      type: String,
     },
     bookedBy: {
       type: mongoose.Schema.Types.ObjectId,

@@ -14,10 +14,11 @@ const {
   resetPassword
 } = require("../controller/authController");
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
+const {isVehicleBooked}= require('../middlewares/vehicleBookingMiddlware')
 
 router.post("/login",loginUser);
 router.post("/register", registerUser);
-router.post("/booking",authMiddleware,createBooking);
+router.post("/booking/:id",authMiddleware,isVehicleBooked,createBooking);
 router.post('/forget-password',forgetPassword);
 
 router.put('/logout',authMiddleware,logoutUser);

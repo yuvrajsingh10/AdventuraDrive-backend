@@ -1,3 +1,4 @@
+const Bookings = require("../db/models/bookingModel");
 const Vehicle = require("../db/models/vehicleModel");
 const validateMongoDbId = require("../utils/validateMongoDbId");
 
@@ -55,4 +56,13 @@ const updateVehicle = async (req, res) => {
     throw new Error(error);
   }
 };
+
+const checkAvailableVehicle = async (req,res)=>{
+  try {
+    const {pickUpDate} = req.body;
+    const Booking = await Bookings.find({pickUpDate});
+  } catch (error) {
+    throw new Error(error);
+  }
+}
 module.exports = { getAllVehicles, addVehicle };

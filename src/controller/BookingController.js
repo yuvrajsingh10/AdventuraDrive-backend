@@ -21,4 +21,13 @@ const getMyBookings = async (req, res) => {
   }
 };
 
+const cancelBooking = (req, res) => {
+  const { id } = req.params;
+  try {
+    validateMongoDbId(id);
+    
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 module.exports = { getAllBookings, getMyBookings };
