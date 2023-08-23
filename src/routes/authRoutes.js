@@ -21,8 +21,9 @@ router.post("/register", registerUser);
 router.post("/booking/:id",authMiddleware,isVehicleBooked,createBooking);
 router.post('/forget-password',forgetPassword);
 
+
 router.put('/logout',authMiddleware,logoutUser);
-router.put('/update-user/:id',authMiddleware,updateUser)
+router.put('/update-user/:id',authMiddleware,isAdmin,updateUser)
 router.put('/reset-password/:token',resetPassword)
 
 router.get('/get-users',authMiddleware,isAdmin,getAllUsers);

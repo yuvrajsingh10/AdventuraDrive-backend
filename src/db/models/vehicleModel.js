@@ -21,10 +21,10 @@ const vehicleSchama = mongoose.Schema(
     luggageCapacity: {
       type: Number,
     },
-    // price:{
-    //   type:Number,
-    //   required:true,
-    // },
+    price:{
+      type:Number,
+      required:true,
+    },     
     bookingTimeStamps: [],
     status: {
       type: String,
