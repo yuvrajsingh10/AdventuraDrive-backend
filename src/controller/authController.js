@@ -128,7 +128,7 @@ const createBooking = async (req, res) => {
     vehicle.bookingTimeStamps.push({
       from: dayjs().format(bookingDate.from),
       to: dayjs().format(bookingDate.to),
-    });    // refmvancouver
+    });// refmvancouver
     await vehicle.save();
     res.json({
       msg: "Car Booked succesfully",

@@ -17,7 +17,7 @@ const addVehicle = async (req, res) => {
     const vehicle = await Vehicle.findOne({name:vehicleData.name});
     if (vehicle) {
       const newVehicle = await Vehicle.findOneAndUpdate(
-        vehicle.name,
+        {name:vehicle.name},
         {
           $inc: { quantity: +vehicle.quantity },  
         },  
@@ -48,7 +48,7 @@ const updateVehicle = async (req, res) => {
   const { id } = req.params;
   try {
     validateMongoDbId(id);
-    const updatedVehicle = await Vehicle.FindOneAndUpdate(id, req.body, {
+    const updatedVehicle = await Vehicle.findOneAndUpdate({_id:id}, req.body, {
       new: true,
     });
     res.json(updatedVehicle);
@@ -57,12 +57,5 @@ const updateVehicle = async (req, res) => {
   }
 };
 
-const checkAvailableVehicle = async (req,res)=>{
-  try {
-    const {pickUpDate} = req.body;
-    const Booking = await Bookings.find({pickUpDate});
-  } catch (error) {
-    throw new Error(error);
-  }
-}
-module.exports = { getAllVehicles, addVehicle };
+
+module.exports = { getAllVehicles, addVehicle,removeVehicle,updateVehicle };
