@@ -13,8 +13,9 @@ dayjs.extend(isBetween)
 
 // login User Controller
 const loginUser = async (req, res) => {
+
   try {
-    const findUser = await User.findOne({ email: req.body.email });
+    const findUser = await User.findOne({ email: req.body.email.toLowerCase() });
 
     if (findUser && (await findUser.isPasswordMatched(req.body.password))) {
       const refreshToken = await generateRefreshToken(findUser?._id);
@@ -37,7 +38,7 @@ const loginUser = async (req, res) => {
         token: generateToken({ id: findUser?._id }),
       });
     } else {
-      res.status(404).send("User is not registered Please login");
+      res.status(409).send("User is not registered ");
     }
   } catch (error) {
     throw new Error(error);
@@ -47,15 +48,21 @@ const loginUser = async (req, res) => {
 //  Register User
 const registerUser = async (req, res) => {
   try {
-    const isAlreadyRegistered = await User.findOne({ email: req.body.email });
+
+    const isAlreadyRegistered = await User.findOne({ email: req.body.email.toLowerCase() });
     if (!isAlreadyRegistered) {
-      const newUser = await User.create(req.body);
+      const newUser = await User.create({
+        name:req.body.name,
+        email:req.body.email.toLowerCase(),
+        age:req.body.age,
+        phone:req.body.phone,
+        password:req.body.password
+      });
       res.json({
         msg: "User registered Succesfully",
-        newUser,
       });
     } else {
-      res.status(404).send("user Already Exist Please Login");
+      res.status(409).send({msg:"user Already Exist Please Login"});
     }
   } catch (error) {
     throw new Error(error);
@@ -66,10 +73,10 @@ const registerUser = async (req, res) => {
 const logoutUser = async (req, res) => {
   const cookie = req.cookies;
   if (!cookie.refreshToken)
-    throw new Error("This is no refresh Token Attached");
-  const refreshToken = cookie.refreshToken;
-  const user = await User.findOne({ refreshToken });
-  if (!user) {
+  throw new Error("This is no refresh Token Attached");
+const refreshToken = cookie.refreshToken;
+const user = await User.findOne({ refreshToken });
+if (!user) {
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
@@ -77,7 +84,7 @@ const logoutUser = async (req, res) => {
     return res.sendStatus(204); // Forbidden
   }
   await User.findOneAndUpdate(
-    refreshToken,
+    {refreshToken},
     {
       refreshToken: "",
     },

@@ -1,6 +1,8 @@
 const Bookings = require("../db/models/bookingModel");
 const Vehicle = require("../db/models/vehicleModel");
+const { cloudinaryUploadImg } = require("../utils/Cloudinary");
 const validateMongoDbId = require("../utils/validateMongoDbId");
+const fs = require("fs");
 
 const getAllVehicles = async (req, res) => {
   try {
@@ -14,14 +16,14 @@ const getAllVehicles = async (req, res) => {
 const addVehicle = async (req, res) => {
   const vehicleData = req.body;
   try {
-    const vehicle = await Vehicle.findOne({name:vehicleData.name});
+    const vehicle = await Vehicle.findOne({ name: vehicleData.name });
     if (vehicle) {
       const newVehicle = await Vehicle.findOneAndUpdate(
-        {name:vehicle.name},
+        { name: vehicle.name },
         {
-          $inc: { quantity: +vehicle.quantity },  
-        },  
-        { new:true }
+          $inc: { quantity: +vehicle.quantity },
+        },
+        { new: true }
       );
       res.json(newVehicle);
     } else {
@@ -48,14 +50,41 @@ const updateVehicle = async (req, res) => {
   const { id } = req.params;
   try {
     validateMongoDbId(id);
-    const updatedVehicle = await Vehicle.findOneAndUpdate({_id:id}, req.body, {
-      new: true,
-    });
+    const updatedVehicle = await Vehicle.findOneAndUpdate(
+      { _id: id },
+      req.body,
+      {
+        new: true,
+      }
+    );
     res.json(updatedVehicle);
   } catch (error) {
     throw new Error(error);
   }
 };
 
+const uploadVehicleImages = async (req, res) => {
+  try {
+    const uploader = (path) =>  cloudinaryUploadImg(path,"images");
+    const urls = [];
+    const files = req.files;
+    for (const file of files) {
+      const { path } = file;
+      const newPath = await uploader(path);
+      urls.push(newPath);
+      fs.unlinkSync(path);
+    }
+    const images = urls.map((file) => file);
+    res.json(images);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 
-module.exports = { getAllVehicles, addVehicle,removeVehicle,updateVehicle };
+module.exports = {
+  getAllVehicles,
+  addVehicle,
+  removeVehicle,
+  updateVehicle,
+  uploadVehicleImages,
+};

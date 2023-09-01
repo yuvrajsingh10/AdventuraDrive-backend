@@ -10,10 +10,14 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
 const port = process.env.PORT || 3000 ;
 const morgan = require('morgan')
-
+const corsOptions={
+  origin:'http://localhost:5173',
+  credentials:true,
+  optionSuccessStatus:200,
+}
 
 app.use(morgan('dev'))
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,7 +27,7 @@ app.use('/api/vehicle',vehicleRoutes)
 
 initDbConnection()
   .then(() => {
-    app.listen(3000, () => {
+    app.listen(port, () => {
       console.log(`App is running on ${port}`);
     });
   })
