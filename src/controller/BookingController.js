@@ -1,5 +1,7 @@
 const Bookings = require("../db/models/bookingModel");
 const validateMongoDbId = require("../utils/validateMongoDbId");
+const Vehicle = require("../db/models/vehicleModel");
+const dayjs = require("dayjs");
 
 const getAllBookings = async (req, res) => {
   try {
@@ -25,9 +27,11 @@ const cancelBooking = (req, res) => {
   const { id } = req.params;
   try {
     validateMongoDbId(id);
-    
   } catch (error) {
     throw new Error(error);
   }
 };
+
+
+
 module.exports = { getAllBookings, getMyBookings };

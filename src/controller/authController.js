@@ -160,7 +160,7 @@ const getUser = async (req, res) => {
   try {
     validateMongoDbId(_id);
     const user = await User.findById({ _id });
-    res.json(user);
+    res.json(user); 
   } catch (error) {
     throw new Error("Somethig went wrong Please try again later ");
   }

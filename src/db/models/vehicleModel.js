@@ -9,6 +9,13 @@ const vehicleSchama = mongoose.Schema(
     category: {
       type: String,
       required: true,
+      default:"Car",
+      enum:["Car","Van","Minibus","Prestige"]
+    },
+    Type:{
+      type:String,
+      default:"Sedan",
+      enum:['Suv','Sedan',"HatchBack"]
     },
     seatingCapacity: {
       type: Number,

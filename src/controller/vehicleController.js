@@ -3,6 +3,7 @@ const Vehicle = require("../db/models/vehicleModel");
 const { cloudinaryUploadImg } = require("../utils/Cloudinary");
 const validateMongoDbId = require("../utils/validateMongoDbId");
 const fs = require("fs");
+const dayjs = require("dayjs");
 
 const getAllVehicles = async (req, res) => {
   try {
@@ -65,7 +66,7 @@ const updateVehicle = async (req, res) => {
 
 const uploadVehicleImages = async (req, res) => {
   try {
-    const uploader = (path) =>  cloudinaryUploadImg(path,"images");
+    const uploader = (path) => cloudinaryUploadImg(path, "images");
     const urls = [];
     const files = req.files;
     for (const file of files) {
@@ -81,10 +82,49 @@ const uploadVehicleImages = async (req, res) => {
   }
 };
 
+const checkAvailability = async (req, res) => {
+  const {
+    vehicleType,
+    pickUpLocation,
+    dropLocation,
+    pickUpTime,
+    returnTime,
+    from,
+    to,
+  } = req.body;
+  try {
+    const bookingDate = {
+      from: dayjs().format(from + "T" + pickUpTime),
+      to: dayjs().format(to + "T" + returnTime),
+    };
+    const availablbilityVehicle = await Vehicle.find({});
+
+
+    let vehicles = availablbilityVehicle.filter((vehicleAvail) => {
+      let date = [];
+      date = vehicleAvail.bookingTimeStamps.filter(
+        (element) =>
+          dayjs(bookingDate.from).isSame(element.from) ||
+          dayjs(bookingDate.to).isSame(element.to) ||
+          dayjs(bookingDate.to).isSame(element.from) ||
+          dayjs(bookingDate.from).isSame(element.to) ||
+          dayjs(bookingDate.from).isBetween(element.from, element.to) ||
+          dayjs(bookingDate.to).isBetween(element.from, element.to)
+      );
+      if ((vehicleAvail.bookingTimeStamps.length === 0 || date.length===0)&& vehicleType == vehicleAvail.category)
+        return vehicleAvail;
+    });
+    res.json(vehicles);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 module.exports = {
   getAllVehicles,
   addVehicle,
   removeVehicle,
   updateVehicle,
   uploadVehicleImages,
+  checkAvailability,
 };
