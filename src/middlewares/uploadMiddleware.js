@@ -29,15 +29,14 @@ const uploadImages = multer({
   limits: { fileSize: 2000000 },
 });
 
-
-// resize the image 
+// resize the image
 const vehicleImageResize = async (req, res, next) => {
   if (!req.files) return next();
   try {
     await Promise.all(
       req.files.map(async (file) => {
         const buffer = await sharp(file.path)
-          .resize(300, 300)
+          .resize(300, 200)
           .toFormat("jpeg")
           .jpeg({ quality: 90 })
           .toBuffer();
@@ -52,7 +51,7 @@ const vehicleImageResize = async (req, res, next) => {
 };
 
 // upload image to clouddinary
-const uploadVehicleImage = async (req, res,next) => {
+const uploadVehicleImage = async (req, res, next) => {
   try {
     const file = req.files;
     if (!file) throw new Error("Vehicle Image is not present");
@@ -65,9 +64,14 @@ const uploadVehicleImage = async (req, res,next) => {
       urls.push(newPath);
       fs.unlinkSync(path);
     }
-    const images = urls.map((file) => file);
-    req.images = images;
-    next();
+   new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve((images = urls.map((file) => file)));
+      }, 50);
+    }).then((images)=>{
+      req.images = images;
+      next();
+    })
   } catch (error) {
     throw new Error(error);
   }
