@@ -2,6 +2,7 @@ const multer = require("multer");
 const path = require("path");
 const sharp = require("sharp");
 const fs = require("fs");
+const { cloudinaryUploadImg } = require("../utils/Cloudinary");
 sharp.cache(false);
 
 const multerStorage = multer.diskStorage({
@@ -28,6 +29,8 @@ const uploadImages = multer({
   limits: { fileSize: 2000000 },
 });
 
+
+// resize the image 
 const vehicleImageResize = async (req, res, next) => {
   if (!req.files) return next();
   try {
@@ -48,4 +51,26 @@ const vehicleImageResize = async (req, res, next) => {
   }
 };
 
-module.exports = { vehicleImageResize, uploadImages };
+// upload image to clouddinary
+const uploadVehicleImage = async (req, res,next) => {
+  try {
+    const file = req.files;
+    if (!file) throw new Error("Vehicle Image is not present");
+    const uploader = (path) => cloudinaryUploadImg(path, "images");
+    const urls = [];
+    const files = req.files;
+    for (const file of files) {
+      const { path } = file;
+      const newPath = await uploader(path);
+      urls.push(newPath);
+      fs.unlinkSync(path);
+    }
+    const images = urls.map((file) => file);
+    req.images = images;
+    next();
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+module.exports = { vehicleImageResize, uploadImages, uploadVehicleImage };

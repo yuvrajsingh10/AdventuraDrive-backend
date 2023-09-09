@@ -1,10 +1,9 @@
-const Bookings = require("../db/models/bookingModel");
 const Vehicle = require("../db/models/vehicleModel");
-const { cloudinaryUploadImg } = require("../utils/Cloudinary");
 const validateMongoDbId = require("../utils/validateMongoDbId");
-const fs = require("fs");
 const dayjs = require("dayjs");
 
+
+// get All vehicles
 const getAllVehicles = async (req, res) => {
   try {
     const vehicles = await Vehicle.find({});
@@ -13,6 +12,8 @@ const getAllVehicles = async (req, res) => {
     throw new Error(error);
   }
 };
+
+// add vehicle 
 
 const addVehicle = async (req, res) => {
   const vehicleData = req.body;
@@ -28,7 +29,7 @@ const addVehicle = async (req, res) => {
       );
       res.json(newVehicle);
     } else {
-      const newVehicle = await Vehicle.create(vehicleData);
+      const newVehicle = await Vehicle.create({...vehicleData,images:[...req.images]}); 
       res.json(newVehicle);
     }
   } catch (error) {
@@ -36,6 +37,7 @@ const addVehicle = async (req, res) => {
   }
 };
 
+// remove Vechicle
 const removeVehicle = async (req, res) => {
   const { id } = req.params;
   try {
@@ -47,6 +49,7 @@ const removeVehicle = async (req, res) => {
   }
 };
 
+// Update Vehicle
 const updateVehicle = async (req, res) => {
   const { id } = req.params;
   try {
@@ -64,29 +67,34 @@ const updateVehicle = async (req, res) => {
   }
 };
 
-const uploadVehicleImages = async (req, res) => {
-  try {
-    const uploader = (path) => cloudinaryUploadImg(path, "images");
-    const urls = [];
-    const files = req.files;
-    for (const file of files) {
-      const { path } = file;
-      const newPath = await uploader(path);
-      urls.push(newPath);
-      fs.unlinkSync(path);
-    }
-    const images = urls.map((file) => file);
-    res.json(images);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
 
+// upload vehicle images to cloud
+
+// const uploadVehicleImages = async (req, res) => {
+//   try {
+//     const uploader = (path) => cloudinaryUploadImg(path, "images");
+//     const urls = [];
+//     const files = req.files;
+//     for (const file of files) {
+//       const { path } = file;
+//       const newPath = await uploader(path);
+//       urls.push(newPath);
+//       fs.unlinkSync(path);
+//     }
+//     const images = urls.map((file) => file);
+//     console.log(images)
+//     res.json(images);
+//   } catch (error) {
+//     throw new Error(error);
+//   }
+// };
+
+
+// Check the vechicle Availability 
 const checkAvailability = async (req, res) => {
+  console.log(req.body)
   const {
     vehicleType,
-    pickUpLocation,
-    dropLocation,
     pickUpTime,
     returnTime,
     from,
@@ -125,6 +133,6 @@ module.exports = {
   addVehicle,
   removeVehicle,
   updateVehicle,
-  uploadVehicleImages,
   checkAvailability,
+  /* uploadVehicleImages,*/
 };

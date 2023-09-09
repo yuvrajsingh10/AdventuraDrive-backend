@@ -28,6 +28,7 @@ const vehicleSchama = mongoose.Schema(
     luggageCapacity: {
       type: Number,
     },
+    images:[],
     price:{
       type:Number,
       required:true,

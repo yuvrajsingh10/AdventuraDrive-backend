@@ -5,27 +5,28 @@ const {
   addVehicle,
   removeVehicle,
   updateVehicle,
-  uploadVehicleImages,
+  // uploadVehicleImages,
   checkAvailability
 } = require("../controller/vehicleController");
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 const {
   vehicleImageResize,
-  uploadImages
+  uploadImages,
+  uploadVehicleImage
 } = require("../middlewares/uploadMiddleware");
 
 router.get("/all-vehicles", getAllVehicles);
 
 router.post("/check-vehicle-available", checkAvailability);
-router.post("/vehicle", authMiddleware, isAdmin, addVehicle);
-router.post(
-  "/upload",
-  authMiddleware,
-  isAdmin,
-  uploadImages.array("images", 10),
-  vehicleImageResize,
-  uploadVehicleImages
-);
+router.post("/vehicle", authMiddleware, isAdmin,uploadImages.array("images", 10),vehicleImageResize,uploadVehicleImage, addVehicle);
+// router.post(
+//   "/upload",
+//   authMiddleware,
+//   isAdmin,
+//   uploadImages.array("images", 10),
+//   vehicleImageResize,
+//   uploadVehicleImages
+// );
 router.put("/update-vehicle/:id", authMiddleware, isAdmin, updateVehicle);
 router.delete("/delete-vehicle/:id", authMiddleware, isAdmin, removeVehicle);
 
