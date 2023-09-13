@@ -13,7 +13,7 @@ const morgan = require('morgan')
 const corsOptions={
   origin:'http://localhost:5173',
   credentials:true,
-  optionSuccessStatus:200,
+  optionSuccessStatus:200,  
 }
 
 app.use(morgan('dev'))

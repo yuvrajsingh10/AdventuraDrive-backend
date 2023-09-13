@@ -8,14 +8,15 @@ const Vehicle = require("../db/models/vehicleModel");
 const { sendMail } = require("./emailController");
 const crypto = require("crypto");
 const dayjs = require("dayjs");
-const isBetween = require('dayjs/plugin/isBetween')
-dayjs.extend(isBetween)
+const isBetween = require("dayjs/plugin/isBetween");
+dayjs.extend(isBetween);
 
 // login User Controller
 const loginUser = async (req, res) => {
-
   try {
-    const findUser = await User.findOne({ email: req.body.email.toLowerCase() });
+    const findUser = await User.findOne({
+      email: req.body.email.toLowerCase(),
+    });
 
     if (findUser && (await findUser.isPasswordMatched(req.body.password))) {
       const refreshToken = await generateRefreshToken(findUser?._id);
@@ -48,21 +49,22 @@ const loginUser = async (req, res) => {
 //  Register User
 const registerUser = async (req, res) => {
   try {
-
-    const isAlreadyRegistered = await User.findOne({ email: req.body.email.toLowerCase() });
+    const isAlreadyRegistered = await User.findOne({
+      email: req.body.email.toLowerCase(),
+    });
     if (!isAlreadyRegistered) {
       const newUser = await User.create({
-        name:req.body.name,
-        email:req.body.email.toLowerCase(),
-        age:req.body.age,
-        phone:req.body.phone,
-        password:req.body.password
+        name: req.body.name,
+        email: req.body.email.toLowerCase(),
+        age: req.body.age,
+        phone: req.body.phone,
+        password: req.body.password,
       });
       res.json({
         msg: "User registered Succesfully",
       });
     } else {
-      res.status(409).send({msg:"user Already Exist Please Login"});
+      res.status(409).send({ msg: "user Already Exist Please Login" });
     }
   } catch (error) {
     throw new Error(error);
@@ -73,10 +75,10 @@ const registerUser = async (req, res) => {
 const logoutUser = async (req, res) => {
   const cookie = req.cookies;
   if (!cookie.refreshToken)
-  throw new Error("This is no refresh Token Attached");
-const refreshToken = cookie.refreshToken;
-const user = await User.findOne({ refreshToken });
-if (!user) {
+    throw new Error("This is no refresh Token Attached");
+  const refreshToken = cookie.refreshToken;
+  const user = await User.findOne({ refreshToken });
+  if (!user) {
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
@@ -84,7 +86,7 @@ if (!user) {
     return res.sendStatus(204); // Forbidden
   }
   await User.findOneAndUpdate(
-    {refreshToken},
+    { refreshToken },
     {
       refreshToken: "",
     },
@@ -135,7 +137,7 @@ const createBooking = async (req, res) => {
     vehicle.bookingTimeStamps.push({
       from: dayjs().format(bookingDate.from),
       to: dayjs().format(bookingDate.to),
-    });// refmvancouver
+    }); // refmvancouver
     await vehicle.save();
     res.json({
       msg: "Car Booked succesfully",
@@ -160,7 +162,7 @@ const getUser = async (req, res) => {
   try {
     validateMongoDbId(_id);
     const user = await User.findById({ _id });
-    res.json(user); 
+    res.json(user);
   } catch (error) {
     throw new Error("Somethig went wrong Please try again later ");
   }
@@ -208,7 +210,7 @@ const forgetPassword = async (req, res) => {
     await user.save();
     // const text = "Hey please follow this link to reset password .";
     const resetUrl = `Hey please follow this link to reset password .
-    This link is valid for  10 min from now <br/> <a href="http//localhost:3000/api/user/reset-password/${token}">{Click here}</a>`;
+    This link is valid for  10 min from now <br/> <a href="http//localhost:5173/reset-password/${token}">{Click here}</a>`;
 
     const data = {
       email: user.email,

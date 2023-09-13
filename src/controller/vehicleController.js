@@ -68,31 +68,8 @@ const updateVehicle = async (req, res) => {
 };
 
 
-// upload vehicle images to cloud
-
-// const uploadVehicleImages = async (req, res) => {
-//   try {
-//     const uploader = (path) => cloudinaryUploadImg(path, "images");
-//     const urls = [];
-//     const files = req.files;
-//     for (const file of files) {
-//       const { path } = file;
-//       const newPath = await uploader(path);
-//       urls.push(newPath);
-//       fs.unlinkSync(path);
-//     }
-//     const images = urls.map((file) => file);
-//     console.log(images)
-//     res.json(images);
-//   } catch (error) {
-//     throw new Error(error);
-//   }
-// };
-
-
 // Check the vechicle Availability 
 const checkAvailability = async (req, res) => {
-  console.log(req.body)
   const {
     vehicleType,
     pickUpTime,
@@ -134,5 +111,5 @@ module.exports = {
   removeVehicle,
   updateVehicle,
   checkAvailability,
-  /* uploadVehicleImages,*/
+
 };
